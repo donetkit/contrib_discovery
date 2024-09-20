@@ -8,6 +8,7 @@ type Config struct {
 	Id                 string
 	Name               string
 	RegisterAddr       string
+	NodeAddr           map[string]string
 	RegisterPort       int
 	CheckAddr          string
 	CheckPort          int
@@ -22,4 +23,5 @@ type Config struct {
 	CheckPath          string
 	Token              string
 	GrpcService        grpc.ServiceRegistrar
+	Nodes              int
 }

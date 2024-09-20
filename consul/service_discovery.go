@@ -47,9 +47,33 @@ func (s *Client) Register() error {
 }
 
 func (s *Client) Deregister() error {
-	err := s.client.Agent().ServiceDeregister(s.options.Id)
-	if err != nil {
-		return errors.Wrapf(err, "deregister service error[key=%s]", s.options.Id)
+	var err error
+	if s.options.Nodes > 1 {
+		catalogServices, _, errService := s.client.Catalog().Service(s.options.Name, "", nil)
+		if errService == nil {
+			for _, service := range catalogServices {
+				if service.ServiceID == s.options.Id {
+					address := fmt.Sprintf("%s:%d", service.Address, 8500)
+					addrVal, ok := s.options.NodeAddr[service.Node]
+					if ok {
+						address = addrVal
+					}
+					client, errClient := consulApi.NewClient(&consulApi.Config{Token: s.options.Token, Address: address})
+					if errClient == nil {
+						errServiceDeregister := client.Agent().ServiceDeregister(service.ServiceID)
+						if errServiceDeregister != nil {
+							err = errors.Wrapf(errServiceDeregister, "deregister service error[key=%s]", s.options.Id)
+						}
+					}
+				}
+			}
+		}
+	} else {
+		errServiceDeregister := s.client.Agent().ServiceDeregister(s.options.Id)
+		if errServiceDeregister != nil {
+			err = errors.Wrapf(errServiceDeregister, "deregister service error[key=%s]", s.options.Id)
+		}
 	}
-	return nil
+
+	return err
 }

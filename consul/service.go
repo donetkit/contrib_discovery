@@ -54,6 +54,7 @@ func New(opts ...discovery.Option) (*Client, error) {
 		TimeOut:        3,
 		CheckResponse:  &discovery.CheckResponse{RetryCount: 3},
 		CheckType:      "TCP",
+		NodeAddr:       map[string]string{},
 	}
 	cfg.CheckResponse.SetHealthy("Healthy")
 	cfg.HttpRouter = func(r *discovery.CheckResponse) {}
@@ -65,10 +66,21 @@ func New(opts ...discovery.Option) (*Client, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "create consul client error")
 	}
+
+	clientCatalog := consulCli.Catalog()
+	modes, _, err := clientCatalog.Nodes(nil)
+	if err == nil && len(modes) > 1 {
+		consulServers, _, errServer := clientCatalog.Service("consul", "", nil)
+		if errServer == nil {
+			cfg.Nodes = len(consulServers)
+		}
+	}
+
 	consulClient := &Client{
 		options: cfg,
 		client:  consulCli,
 	}
+
 	consulClient.checkHealthyStatus()
 	return consulClient, nil
 }

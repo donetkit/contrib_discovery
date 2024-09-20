@@ -59,6 +59,15 @@ func WithRegisterPort(port int) Option {
 	}
 }
 
+// WithNodeAddr set addr function
+func WithNodeAddr(val map[string]string) Option {
+	return func(cfg *Config) {
+		for k, v := range val {
+			cfg.NodeAddr[k] = v
+		}
+	}
+}
+
 // WithCheckAddr set addr function
 func WithCheckAddr(addr string) Option {
 	return func(cfg *Config) {
