@@ -42,7 +42,7 @@ type Client struct {
 
 func New(opts ...discovery.Option) (*Client, error) {
 	cfg := &discovery.Config{
-		Id:             fmt.Sprintf("%d", time.Now().UnixMilli()),
+		Id:             fmt.Sprintf("xd%d", time.Now().UnixMilli()),
 		Name:           "Service",
 		RegisterAddr:   "127.0.0.1",
 		RegisterPort:   8500,
