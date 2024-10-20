@@ -69,7 +69,10 @@ func New(opts ...discovery.Option) (*Client, error) {
 
 	clientCatalog := consulCli.Catalog()
 	modes, _, err := clientCatalog.Nodes(nil)
-	if err == nil && len(modes) > 1 {
+	if err != nil {
+		return nil, err
+	}
+	if len(modes) > 1 {
 		consulServers, _, errServer := clientCatalog.Service("consul", "", nil)
 		if errServer == nil {
 			cfg.Nodes = len(consulServers)
